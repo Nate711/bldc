@@ -42,28 +42,28 @@ void servo_simple_init(void) {
 	palSetPadMode(HW_ICU_GPIO, HW_ICU_PIN, PAL_MODE_ALTERNATE(HW_ICU_GPIO_AF) |
 			PAL_STM32_OSPEED_HIGHEST | PAL_STM32_PUDR_FLOATING);
 
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM7, ENABLE);
 
 	TIM_TimeBaseStructure.TIM_Period = (uint16_t)((uint32_t)TIM_CLOCK / (uint32_t)SERVO_OUT_RATE_HZ);
 	TIM_TimeBaseStructure.TIM_Prescaler = (uint16_t)((168000000 / 2) / TIM_CLOCK) - 1;
 	TIM_TimeBaseStructure.TIM_ClockDivision = 0;
 	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
 
-	TIM_TimeBaseInit(TIM3, &TIM_TimeBaseStructure);
+	TIM_TimeBaseInit(TIM7, &TIM_TimeBaseStructure);
 
 	TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1;
 	TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
 	TIM_OCInitStructure.TIM_Pulse = 0;
 	TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High;
 
-	TIM_OC2Init(TIM3, &TIM_OCInitStructure);
-	TIM_OC2PreloadConfig(TIM3, TIM_OCPreload_Enable);
+	TIM_OC2Init(TIM7, &TIM_OCInitStructure);
+	TIM_OC2PreloadConfig(TIM7, TIM_OCPreload_Enable);
 
-	TIM_ARRPreloadConfig(TIM3, ENABLE);
+	TIM_ARRPreloadConfig(TIM7, ENABLE);
 
 	servo_simple_set_output(0.5);
 
-	TIM_Cmd(TIM3, ENABLE);
+	TIM_Cmd(TIM7, ENABLE);
 }
 
 void servo_simple_set_output(float out) {
@@ -71,7 +71,7 @@ void servo_simple_set_output(float out) {
 
 	float us = (float)SERVO_OUT_PULSE_MIN_US + out * (float)(SERVO_OUT_PULSE_MAX_US - SERVO_OUT_PULSE_MIN_US);
 	us *= (float)TIM_CLOCK / 1000000.0;
-	TIM3->CCR2 = (uint32_t)us;
+	TIM7->CCR2 = (uint32_t)us;
 }
 
 #endif
