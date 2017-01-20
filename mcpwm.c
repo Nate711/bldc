@@ -360,7 +360,7 @@ void mcpwm_init(volatile mc_configuration *configuration) {
 
 	TIM_TimeBaseStructure.TIM_Prescaler = 0;
 	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
-	TIM_TimeBaseStructure.TIM_Period = 0xFFFF; 
+	TIM_TimeBaseStructure.TIM_Period = 0xFFFF;
 	TIM_TimeBaseStructure.TIM_ClockDivision = 0;
 	TIM_TimeBaseStructure.TIM_RepetitionCounter = 0;
 	TIM_TimeBaseInit(TIM8, &TIM_TimeBaseStructure);
@@ -2406,9 +2406,9 @@ static void update_timer_attempt(void) {
 		TIM1->CCR1 = timer_struct.duty;
 		TIM1->CCR2 = timer_struct.duty;
 		TIM1->CCR3 = timer_struct.duty;
-		TIM8->CCR1 = timer_struct.val_sample;
+		TIM8->CCR3 = timer_struct.val_sample;
 		TIM1->CCR4 = timer_struct.curr1_sample;
-		TIM8->CCR2 = timer_struct.curr2_sample;
+		TIM8->CCR4 = timer_struct.curr2_sample;
 
 		// Enables preload register updates
 		TIM1->CR1 &= ~TIM_CR1_UDIS;
