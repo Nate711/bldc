@@ -121,9 +121,15 @@
 // ICU Peripheral for servo decoding
 #define HW_ICU_DEV			ICUD3
 #define HW_ICU_CHANNEL		ICU_CHANNEL_2
+// change back to TIM3 when decoding pwm
 #define HW_ICU_GPIO_AF		GPIO_AF_TIM3
 #define HW_ICU_GPIO			GPIOB
 #define HW_ICU_PIN			5
+
+// Alternate servo output on PC6 which is TX_SDA
+#define HW_SERVO_OUT_GPIO GPIOC
+#define HW_SERVO_OUT_PIN 6
+#define HW_SERVO_OUT_AF GPIO_AF_TIM8
 
 // I2C Peripheral
 #define HW_I2C_DEV			I2CD2
