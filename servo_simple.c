@@ -33,9 +33,12 @@
 // Settings
 #define TIM_CLOCK			1000000 // Hz
 
-#if SERVO_OUT_ENABLE && SERVO_OUT_SIMPLE
+#if SERVO_OUT_ENABLE_ALT && SERVO_OUT_SIMPLE
 
 void servo_simple_init(void) {
+	// NATHAN - take over the TX_SDA pin
+	hw_stop_i2c();
+
 	TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
 	TIM_OCInitTypeDef  TIM_OCInitStructure;
 
@@ -65,12 +68,9 @@ void servo_simple_init(void) {
 
 	TIM_ARRPreloadConfig(TIM3, ENABLE);
 
-	servo_simple_set_output(0.5);
+	servo_simple_set_output(0.2);
 
 	TIM_Cmd(TIM3, ENABLE);
-
-	// NATHAN - take over the TX_SDA pin
-	hw_stop_i2c();
 }
 
 void servo_simple_set_output(float out) {
