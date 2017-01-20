@@ -137,7 +137,7 @@ static THD_FUNCTION(periodic_thread, arg) {
 		}
 		}
 
-		servo_simple_set_output(encoder_read_deg()/360.0);
+		//servo_simple_set_output(encoder_read_deg()/360.0);
 
 		chThdSleepMilliseconds(10);
 	}
