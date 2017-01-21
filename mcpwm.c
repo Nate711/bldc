@@ -212,9 +212,9 @@ void mcpwm_init(volatile mc_configuration *configuration) {
 	filter_create_fir_lowpass((float*)current_fir_coeffs, CURR_FIR_FCUT, CURR_FIR_TAPS_BITS, 1);
 
 	TIM_DeInit(TIM1);
-	TIM_DeInit(TIM8);
+	TIM_DeInit(TIM5);
 	TIM1->CNT = 0;
-	TIM8->CNT = 0;
+	TIM5->CNT = 0;
 
 	// TIM1 clock enable
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1, ENABLE);
@@ -356,14 +356,14 @@ void mcpwm_init(volatile mc_configuration *configuration) {
 
 	// ------------- Timer8 for ADC sampling ------------- //
 	// Time Base configuration
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM8, ENABLE);
+	RCC_APB2PeriphClockCmd(RCC_APB1Periph_TIM5, ENABLE);
 
 	TIM_TimeBaseStructure.TIM_Prescaler = 0;
 	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
 	TIM_TimeBaseStructure.TIM_Period = 0xFFFF;
 	TIM_TimeBaseStructure.TIM_ClockDivision = 0;
 	TIM_TimeBaseStructure.TIM_RepetitionCounter = 0;
-	TIM_TimeBaseInit(TIM8, &TIM_TimeBaseStructure);
+	TIM_TimeBaseInit(TIM5, &TIM_TimeBaseStructure);
 
 	TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1;
 	TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
@@ -372,26 +372,26 @@ void mcpwm_init(volatile mc_configuration *configuration) {
 	TIM_OCInitStructure.TIM_OCNPolarity = TIM_OCNPolarity_High;
 	TIM_OCInitStructure.TIM_OCIdleState = TIM_OCIdleState_Set;
 	TIM_OCInitStructure.TIM_OCNIdleState = TIM_OCNIdleState_Set;
-	TIM_OC1Init(TIM8, &TIM_OCInitStructure);
-	TIM_OC1PreloadConfig(TIM8, TIM_OCPreload_Enable);
-	TIM_OC2Init(TIM8, &TIM_OCInitStructure);
-	TIM_OC2PreloadConfig(TIM8, TIM_OCPreload_Enable);
+	TIM_OC1Init(TIM5, &TIM_OCInitStructure);
+	TIM_OC1PreloadConfig(TIM5, TIM_OCPreload_Enable);
+	TIM_OC2Init(TIM5, &TIM_OCInitStructure);
+	TIM_OC2PreloadConfig(TIM5, TIM_OCPreload_Enable);
 
-	TIM_ARRPreloadConfig(TIM8, ENABLE);
-	TIM_CCPreloadControl(TIM8, ENABLE);
+	TIM_ARRPreloadConfig(TIM5, ENABLE);
+	TIM_CCPreloadControl(TIM5, ENABLE);
 
 	// PWM outputs have to be enabled in order to trigger ADC on CCx
-	TIM_CtrlPWMOutputs(TIM8, ENABLE);
+	TIM_CtrlPWMOutputs(TIM5, ENABLE);
 
-	// TIM1 Master and TIM8 slave
+	// TIM1 Master and TIM5 slave
 	TIM_SelectOutputTrigger(TIM1, TIM_TRGOSource_Update);
 	TIM_SelectMasterSlaveMode(TIM1, TIM_MasterSlaveMode_Enable);
-	TIM_SelectInputTrigger(TIM8, TIM_TS_ITR0);
-	TIM_SelectSlaveMode(TIM8, TIM_SlaveMode_Reset);
+	TIM_SelectInputTrigger(TIM5, TIM_TS_ITR0);
+	TIM_SelectSlaveMode(TIM5, TIM_SlaveMode_Reset);
 
-	// Enable TIM1 and TIM8
+	// Enable TIM1 and TIM5
 	TIM_Cmd(TIM1, ENABLE);
-	TIM_Cmd(TIM8, ENABLE);
+	TIM_Cmd(TIM5, ENABLE);
 
 	// Main Output Enable
 	TIM_CtrlPWMOutputs(TIM1, ENABLE);
@@ -467,7 +467,7 @@ void mcpwm_deinit(void) {
 
 	TIM_DeInit(TIM1);
 	TIM_DeInit(TIM2);
-	TIM_DeInit(TIM8);
+	TIM_DeInit(TIM5);
 	TIM_DeInit(TIM12);
 	ADC_DeInit();
 	DMA_DeInit(DMA2_Stream4);
@@ -2399,20 +2399,20 @@ static void update_timer_attempt(void) {
 	if (!timer_struct.updated && TIM1->CNT > 10 && TIM1->CNT < (TIM1->ARR - 500)) {
 		// Disable preload register updates
 		TIM1->CR1 |= TIM_CR1_UDIS;
-		TIM8->CR1 |= TIM_CR1_UDIS;
+		TIM5->CR1 |= TIM_CR1_UDIS;
 
 		// Set the new configuration
 		TIM1->ARR = timer_struct.top;
 		TIM1->CCR1 = timer_struct.duty;
 		TIM1->CCR2 = timer_struct.duty;
 		TIM1->CCR3 = timer_struct.duty;
-		TIM8->CCR3 = timer_struct.val_sample;
+		TIM5->CCR3 = timer_struct.val_sample;
 		TIM1->CCR4 = timer_struct.curr1_sample;
-		TIM8->CCR4 = timer_struct.curr2_sample;
+		TIM5->CCR4 = timer_struct.curr2_sample;
 
 		// Enables preload register updates
 		TIM1->CR1 &= ~TIM_CR1_UDIS;
-		TIM8->CR1 &= ~TIM_CR1_UDIS;
+		TIM5->CR1 &= ~TIM_CR1_UDIS;
 		timer_struct.updated = true;
 	}
 
