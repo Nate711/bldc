@@ -112,7 +112,7 @@
 #endif
 
 #ifndef SERVO_OUT_ENABLE_ALT
-#define SERVO_OUT_ENABLE_ALT		1		// Enable servo output on uart tx pin
+#define SERVO_OUT_ENABLE_ALT		1   // Enable servo output on uart tx pin
 #endif
 
 #define SERVO_OUT_SIMPLE		1		// Use simple HW-based driver (recommended)
