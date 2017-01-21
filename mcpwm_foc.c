@@ -143,34 +143,34 @@ static volatile bool timer_thd_stop;
 
 #define TIMER_UPDATE_SAMP(current_samp, voltage_samp) \
 		TIM1->CR1 |= TIM_CR1_UDIS; \
-		TIM8->CR1 |= TIM_CR1_UDIS; \
-		TIM8->CCR1 = voltage_samp; \
+		TIM5->CR1 |= TIM_CR1_UDIS; \
+		TIM5->CCR1 = voltage_samp; \
 		TIM1->CCR4 = current_samp; \
-		TIM8->CCR2 = current_samp; \
+		TIM5->CCR2 = current_samp; \
 		TIM1->CR1 &= ~TIM_CR1_UDIS; \
-		TIM8->CR1 &= ~TIM_CR1_UDIS;
+		TIM5->CR1 &= ~TIM_CR1_UDIS;
 
 #define TIMER_UPDATE_SAMP_TOP(current_samp, voltage_samp, top) \
 		TIM1->CR1 |= TIM_CR1_UDIS; \
-		TIM8->CR1 |= TIM_CR1_UDIS; \
+		TIM5->CR1 |= TIM_CR1_UDIS; \
 		TIM1->ARR = top; \
-		TIM8->ARR = top; \
-		TIM8->CCR1 = voltage_samp; \
+		TIM5->ARR = top; \
+		TIM5->CCR1 = voltage_samp; \
 		TIM1->CCR4 = current_samp; \
-		TIM8->CCR2 = current_samp; \
+		TIM5->CCR2 = current_samp; \
 		TIM1->CR1 &= ~TIM_CR1_UDIS; \
-		TIM8->CR1 &= ~TIM_CR1_UDIS;
+		TIM5->CR1 &= ~TIM_CR1_UDIS;
 
 #define TIMER_UPDATE_DUTY_CURRENTSAMP(duty1, duty2, duty3, current_samp) \
 		TIM1->CR1 |= TIM_CR1_UDIS; \
-		TIM8->CR1 |= TIM_CR1_UDIS; \
+		TIM5->CR1 |= TIM_CR1_UDIS; \
 		TIM1->CCR1 = duty1; \
 		TIM1->CCR2 = duty3; \
 		TIM1->CCR3 = duty2; \
 		TIM1->CCR4 = current_samp; \
-		TIM8->CCR2 = current_samp; \
+		TIM5->CCR2 = current_samp; \
 		TIM1->CR1 &= ~TIM_CR1_UDIS; \
-		TIM8->CR1 &= ~TIM_CR1_UDIS;
+		TIM5->CR1 &= ~TIM_CR1_UDIS;
 
 #define TIMER_DISABLE_PRELOAD_DUTY1()	TIM1->CCMR1 &= (uint16_t)(~TIM_CCMR1_OC1PE)
 #define TIMER_DISABLE_PRELOAD_DUTY2()	TIM1->CCMR2 &= (uint16_t)(~TIM_CCMR2_OC3PE)
@@ -222,9 +222,9 @@ void mcpwm_foc_init(volatile mc_configuration *configuration) {
 	memset((void*)&m_samples, 0, sizeof(mc_sample_t));
 
 	TIM_DeInit(TIM1);
-	TIM_DeInit(TIM8);
+	TIM_DeInit(TIM5);
 	TIM1->CNT = 0;
-	TIM8->CNT = 0;
+	TIM5->CNT = 0;
 
 	// TIM1 clock enable
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1, ENABLE);
@@ -356,16 +356,16 @@ void mcpwm_foc_init(volatile mc_configuration *configuration) {
 	// Enable ADC3
 	ADC_Cmd(ADC3, ENABLE);
 
-	// ------------- Timer8 for ADC sampling ------------- //
+	// ------------- Timer5 for ADC sampling ------------- //
 	// Time Base configuration
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM8, ENABLE);
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM5, ENABLE);
 
 	TIM_TimeBaseStructure.TIM_Prescaler = 0;
 	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_CenterAligned2;
 	TIM_TimeBaseStructure.TIM_Period = SYSTEM_CORE_CLOCK / (int)m_conf->foc_f_sw;
 	TIM_TimeBaseStructure.TIM_ClockDivision = 0;
 	TIM_TimeBaseStructure.TIM_RepetitionCounter = 1;
-	TIM_TimeBaseInit(TIM8, &TIM_TimeBaseStructure);
+	TIM_TimeBaseInit(TIM5, &TIM_TimeBaseStructure);
 
 	TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1;
 	TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
@@ -374,26 +374,26 @@ void mcpwm_foc_init(volatile mc_configuration *configuration) {
 	TIM_OCInitStructure.TIM_OCNPolarity = TIM_OCNPolarity_High;
 	TIM_OCInitStructure.TIM_OCIdleState = TIM_OCIdleState_Set;
 	TIM_OCInitStructure.TIM_OCNIdleState = TIM_OCNIdleState_Set;
-	TIM_OC1Init(TIM8, &TIM_OCInitStructure);
-	TIM_OC1PreloadConfig(TIM8, TIM_OCPreload_Enable);
-	TIM_OC2Init(TIM8, &TIM_OCInitStructure);
-	TIM_OC2PreloadConfig(TIM8, TIM_OCPreload_Enable);
+	TIM_OC1Init(TIM5, &TIM_OCInitStructure);
+	TIM_OC1PreloadConfig(TIM5, TIM_OCPreload_Enable);
+	TIM_OC2Init(TIM5, &TIM_OCInitStructure);
+	TIM_OC2PreloadConfig(TIM5, TIM_OCPreload_Enable);
 
-	TIM_ARRPreloadConfig(TIM8, ENABLE);
-	TIM_CCPreloadControl(TIM8, ENABLE);
+	TIM_ARRPreloadConfig(TIM5, ENABLE);
+	TIM_CCPreloadControl(TIM5, ENABLE);
 
 	// PWM outputs have to be enabled in order to trigger ADC on CCx
-	TIM_CtrlPWMOutputs(TIM8, ENABLE);
+	TIM_CtrlPWMOutputs(TIM5, ENABLE);
 
-	// TIM1 Master and TIM8 slave
+	// TIM1 Master and TIM5 slave
 	TIM_SelectOutputTrigger(TIM1, TIM_TRGOSource_Update);
 	TIM_SelectMasterSlaveMode(TIM1, TIM_MasterSlaveMode_Enable);
-	TIM_SelectInputTrigger(TIM8, TIM_TS_ITR0);
-	TIM_SelectSlaveMode(TIM8, TIM_SlaveMode_Reset);
+	TIM_SelectInputTrigger(TIM5, TIM_TS_ITR0);
+	TIM_SelectSlaveMode(TIM5, TIM_SlaveMode_Reset);
 
-	// Enable TIM1 and TIM8
+	// Enable TIM1 and TIM5
 	TIM_Cmd(TIM1, ENABLE);
-	TIM_Cmd(TIM8, ENABLE);
+	TIM_Cmd(TIM5, ENABLE);
 
 	// Main Output Enable
 	TIM_CtrlPWMOutputs(TIM1, ENABLE);
@@ -445,7 +445,7 @@ void mcpwm_foc_deinit(void) {
 	}
 
 	TIM_DeInit(TIM1);
-	TIM_DeInit(TIM8);
+	TIM_DeInit(TIM5);
 	TIM_DeInit(TIM12);
 	ADC_DeInit();
 	DMA_DeInit(DMA2_Stream4);

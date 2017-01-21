@@ -49,11 +49,11 @@
                                                  through EXTI line.         */
 #define OTG_FS_WKUP_IRQHandler  VectorE8    /**< USB OTG FS Wakeup through
                                                  EXTI line.                 */
-#define TIM8_BRK_IRQHandler     VectorEC    /**< TIM8 Break.                */
-#define TIM8_UP_IRQHandler      VectorF0    /**< TIM8 Update.               */
-#define TIM8_TRG_COM_IRQHandler VectorF4    /**< TIM8 Trigger and
+#define TIM5_BRK_IRQHandler     VectorEC    /**< TIM8 Break.                */
+#define TIM5_UP_IRQHandler      VectorF0    /**< TIM8 Update.               */
+#define TIM5_TRG_COM_IRQHandler VectorF4    /**< TIM8 Trigger and
                                                  Commutation.               */
-#define TIM8_CC_IRQHandler      VectorF8    /**< TIM8 Capture Compare.      */
+#define TIM5_CC_IRQHandler      VectorF8    /**< TIM8 Capture Compare.      */
 #define DMA1_Stream7_IRQHandler VectorFC    /**< DMA1 Stream 7.             */
 #define FSMC_IRQHandler         Vector100   /**< FSMC.                      */
 #define SDIO_IRQHandler         Vector104   /**< SDIO.                      */
