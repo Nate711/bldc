@@ -282,11 +282,17 @@ static THD_FUNCTION(cancom_status_thread, arg) {
 		if (app_get_configuration()->send_can_status) {
 			// Send status message
 			int32_t send_index = 0;
-			uint8_t buffer[8];
-			buffer_append_int32(buffer, (int32_t)mc_interface_get_rpm(), &send_index);
-			buffer_append_int16(buffer, (int16_t)(mc_interface_get_tot_current() * 10.0), &send_index);
-			buffer_append_int16(buffer, (int16_t)(mc_interface_get_duty_cycle_now() * 1000.0), &send_index);
-			comm_can_transmit(app_get_configuration()->controller_id | ((uint32_t)CAN_PACKET_STATUS << 8), buffer, send_index);
+			uint8_t buffer[4];
+
+			// convert rotor degrees (float) to 8 byte integer and append it to buffer
+			buffer_append_int32(buffer, (int32_t)(encoder_read_deg()*100000.0), &send_index);
+			// hopefully don't need the buffer to be 8 bytes
+
+			//buffer_append_int32(buffer, (int32_t)mc_interface_get_rpm(), &send_index);
+			//buffer_append_int16(buffer, (int16_t)(mc_interface_get_tot_current() * 10.0), &send_index);
+			//buffer_append_int16(buffer, (int16_t)(mc_interface_get_duty_cycle_now() * 1000.0), &send_index);
+			comm_can_transmit(app_get_configuration()->controller_id | ((uint32_t)CAN_PACKET_STATUS <
+			< 8), buffer, send_index);
 		}
 
 		systime_t sleep_time = CH_CFG_ST_FREQUENCY / app_get_configuration()->send_can_status_rate_hz;
