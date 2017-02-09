@@ -35,6 +35,7 @@
 #include "app.h"
 #include "crc.h"
 #include "packet.h"
+#include "encoder.h"
 
 // Settings
 #define CANDx			CAND1
@@ -291,8 +292,7 @@ static THD_FUNCTION(cancom_status_thread, arg) {
 			//buffer_append_int32(buffer, (int32_t)mc_interface_get_rpm(), &send_index);
 			//buffer_append_int16(buffer, (int16_t)(mc_interface_get_tot_current() * 10.0), &send_index);
 			//buffer_append_int16(buffer, (int16_t)(mc_interface_get_duty_cycle_now() * 1000.0), &send_index);
-			comm_can_transmit(app_get_configuration()->controller_id | ((uint32_t)CAN_PACKET_STATUS <
-			< 8), buffer, send_index);
+			comm_can_transmit(app_get_configuration()->controller_id | ((uint32_t)CAN_PACKET_STATUS << 8), buffer, send_index);
 		}
 
 		systime_t sleep_time = CH_CFG_ST_FREQUENCY / app_get_configuration()->send_can_status_rate_hz;

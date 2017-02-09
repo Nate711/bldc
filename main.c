@@ -111,7 +111,9 @@ static THD_FUNCTION(periodic_thread, arg) {
 				break;
 
 			case DISP_POS_MODE_PID_POS:
-				commands_send_rotor_pos(mc_interface_get_pid_pos_now());
+				// Returns the actual rotor angle thats fed into the pid loop, not the set position
+				// commands_send_rotor_pos(mc_interface_get_pid_pos_now());
+				commands_send_rotor_pos(mc_interface_get_pid_pos_set());
 				break;
 
 			case DISP_POS_MODE_PID_POS_ERROR:
