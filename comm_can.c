@@ -295,7 +295,16 @@ static THD_FUNCTION(cancom_status_thread, arg) {
 			comm_can_transmit(app_get_configuration()->controller_id | ((uint32_t)CAN_PACKET_STATUS << 8), buffer, send_index);
 		}
 
-		systime_t sleep_time = CH_CFG_ST_FREQUENCY / app_get_configuration()->send_can_status_rate_hz;
+		// systime_t sleep_time = CH_CFG_ST_FREQUENCY / app_get_configuration()->send_can_status_rate_hz;
+
+		// over ride the status rate of the can message
+		/* NOTE: the CAN speed is 500KBaud
+		 * with a 8byte can message that is 128bits without bit stuffing
+		 * with a 4byte can message that is 96bits -> 5000hz
+		 * sending 4 byte messages back and forth -> 2500hz
+		 **/
+
+		systime_t sleep_time = CH_CFG_ST_FREQUENCY / 2000;
 		if (sleep_time == 0) {
 			sleep_time = 1;
 		}
