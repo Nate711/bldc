@@ -158,6 +158,7 @@ static THD_FUNCTION(cancom_process_thread, arg) {
 				CAN_PACKET_ID cmd = rxmsg.EID >> 8;
 				can_status_msg *stat_tmp;
 
+				// TODO: change it so it doesn't read all messages from 255
 				if (id == 255 || id == app_get_configuration()->controller_id) {
 					switch (cmd) {
 					case CAN_PACKET_SET_DUTY:
@@ -295,7 +296,8 @@ static THD_FUNCTION(cancom_status_thread, arg) {
 			comm_can_transmit(app_get_configuration()->controller_id | ((uint32_t)CAN_PACKET_STATUS << 8), buffer, send_index);
 		}
 
-		// systime_t sleep_time = CH_CFG_ST_FREQUENCY / app_get_configuration()->send_can_status_rate_hz;
+		/* MAJOR CHANGE: CAN STATUS FREQ IS 2x THE FREQ SET IN CONFIGURATOR */
+		systime_t sleep_time = CH_CFG_ST_FREQUENCY / (app_get_configuration()->send_can_status_rate_hz*2);
 
 		// over ride the status rate of the can message
 		/* NOTE: the CAN speed is 500KBaud
@@ -304,7 +306,8 @@ static THD_FUNCTION(cancom_status_thread, arg) {
 		 * sending 4 byte messages back and forth -> 2500hz
 		 **/
 
-		systime_t sleep_time = CH_CFG_ST_FREQUENCY / 2000;
+		// the divisor is the period of the update in microseconds
+		// systime_t sleep_time = CH_CFG_ST_FREQUENCY / 1000;
 		if (sleep_time == 0) {
 			sleep_time = 1;
 		}
