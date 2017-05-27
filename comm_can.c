@@ -181,28 +181,26 @@ static THD_FUNCTION(cancom_process_thread, arg) {
 
 						if(!send_can_status) {
 							/******* Janky way to delay sending back the position data ******
-							 * The can status rate hz variable now controls the number of
-							 * microseonds to wait before sending the pos command
+							 * TODO PROBLEM: minimum chthdsleep is 100us bc system time clock
+							 * is 10khz. Instead, I should have the comms look like:
+
+							 |teensy to vesc1 current|..|vesc1 to teensy pos|..
+							 |teensy to vesc2 current|..|vesc2 to teensy pos|
+
+							 * THEREFORE introduce NO delay
 							 ***********************************************/
-
-							// If you set 1000hz, it will delay 1 microseond to send the pos messages
-							// If you set 200hz, it will delay 200 microseonds
-							// CH_CFG_ST_FREQUENCY is 10,000
-							// Will this float operation be slow?
-							systime_t sleep_time = CH_CFG_ST_FREQUENCY *
-									((float)app_get_configuration()->send_can_status_rate_hz/1000000.0);
-
-							chThdSleep(sleep_time);
 
 							// Send position data
 							int32_t send_index = 0;
 				 			uint8_t buffer[4];
 
 				 			// convert rotor degrees (float) to 8 byte integer and append it to buffer
-				 			buffer_append_int32(buffer, (int32_t)(encoder_read_deg()*100000.0), &send_index);
+				 			buffer_append_int32(buffer,
+									(int32_t)(encoder_read_deg()*100000.0), &send_index);
 
 							// transit the data
-				 			comm_can_transmit(app_get_configuration()->controller_id | ((uint32_t)CAN_PACKET_STATUS << 8), buffer, send_index);
+				 			comm_can_transmit(app_get_configuration()->controller_id |
+											((uint32_t)CAN_PACKET_STATUS << 8), buffer, send_index);
 						}
 
 						break;
