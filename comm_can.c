@@ -308,8 +308,7 @@ static THD_FUNCTION(cancom_status_thread, arg) {
 			comm_can_transmit(app_get_configuration()->controller_id | ((uint32_t)CAN_PACKET_STATUS << 8), buffer, send_index);
 		}
 
-		/* MAJOR CHANGE: CAN STATUS FREQ IS 2x THE FREQ SET IN CONFIGURATOR */
-		systime_t sleep_time = CH_CFG_ST_FREQUENCY / (app_get_configuration()->send_can_status_rate_hz*2);
+		systime_t sleep_time = CH_CFG_ST_FREQUENCY / (app_get_configuration()->send_can_status_rate_hz);
 
 		// over ride the status rate of the can message
 		/* NOTE: the CAN speed is 500KBaud
