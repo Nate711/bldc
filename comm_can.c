@@ -165,9 +165,9 @@ static THD_FUNCTION(cancom_process_thread, arg) {
 					/** CUSTOM PID CONStANT SETTING **/
 					case CAN_PACKET_SET_P_PID_K:
 						ind = 0;
-						float kp = ((float)buffer_get_int32(rxmsg.data8, &ind) / 1000000.0);
-						float ki = ((float)buffer_get_int32(rxmsg.data8, &ind) / 1000000.0);
-						float kd = ((float)buffer_get_int32(rxmsg.data8, &ind) / 1000000.0);
+						float kp = (buffer_get_int16(rxmsg.data8, &ind) / 100000.0);
+						float ki = (buffer_get_int16(rxmsg.data8, &ind) / 100000.0);
+						float kd = (buffer_get_int16(rxmsg.data8, &ind) / 100000.0);
 
 						mc_interface_set_position_pid_constants(kp,ki,kd);
 						timeout_reset();
