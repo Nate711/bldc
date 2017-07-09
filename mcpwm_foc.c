@@ -525,6 +525,13 @@ void mcpwm_foc_set_pid_speed(float rpm) {
 	}
 }
 
+/** CUSTOM Set pid constants for position pid control **/
+void mcpwm_foc_set_position_pid_constants(float kp, float ki, float kd) {
+	m_conf -> p_pid_kp = kp;
+	m_conf -> p_pid_ki = ki;
+	m_conf -> p_pid_kd = kd;
+}
+
 /**
  * Use PID position control. Note that this only works when encoder support
  * is enabled.

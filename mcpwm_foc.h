@@ -44,6 +44,10 @@ void mcpwm_foc_set_current(float current);
 void mcpwm_foc_set_brake_current(float current);
 float mcpwm_foc_get_duty_cycle_set(void);
 float mcpwm_foc_get_duty_cycle_now(void);
+
+/** CUSTOM set position pid constants **/
+void mcpwm_foc_set_position_pid_constants(float kp, float ki, float kd);
+
 float mcpwm_foc_get_pid_pos_set(void);
 float mcpwm_foc_get_pid_pos_now(void);
 float mcpwm_foc_get_switching_frequency_now(void);

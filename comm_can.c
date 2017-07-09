@@ -161,6 +161,18 @@ static THD_FUNCTION(cancom_process_thread, arg) {
 				// TODO: change it so it doesn't read all messages from 255
 				if (id == 255 || id == app_get_configuration()->controller_id) {
 					switch (cmd) {
+
+					/** CUSTOM PID CONStANT SETTING **/
+					case CAN_PACKET_SET_P_PID_K:
+						ind = 0;
+						float kp = ((float)buffer_get_int32(rxmsg.data8, &ind) / 1000000.0);
+						float ki = ((float)buffer_get_int32(rxmsg.data8, &ind) / 1000000.0);
+						float kd = ((float)buffer_get_int32(rxmsg.data8, &ind) / 1000000.0);
+
+						mc_interface_set_position_pid_constants(kp,ki,kd);
+						timeout_reset();
+						break;
+
 					case CAN_PACKET_SET_DUTY:
 						ind = 0;
 						mc_interface_set_duty((float)buffer_get_int32(rxmsg.data8, &ind) / 100000.0);
