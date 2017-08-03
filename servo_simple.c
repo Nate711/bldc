@@ -45,9 +45,11 @@ void servo_simple_init(void) {
 	 * on the VESC. Set it to its alternate function which is connected to TIM3
 	 */
 
+	// TODO: change this to regular pin on a different pin too
 	palSetPadMode(HW_ICU_GPIO, HW_ICU_PIN, PAL_MODE_ALTERNATE(HW_ICU_GPIO_AF) |
 			PAL_STM32_OSPEED_HIGHEST | PAL_STM32_PUDR_FLOATING);
 
+	// TODO: figure out if pin has to be on APB1 periph
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
 
 	/**
@@ -70,11 +72,23 @@ void servo_simple_init(void) {
 	TIM_OC2Init(TIM3, &TIM_OCInitStructure);
 	TIM_OC2PreloadConfig(TIM3, TIM_OCPreload_Enable);
 
-	TIM_ARRPreloadConfig(TIM3, ENABLE);
+	TIM_ARRPreloadConfig(TIM3, DISABLE);
+
+
+	// TODO set interrupt
+	// Interrupt generation
+	TIM_ITConfig(TIM3, TIM_IT_Update, ENABLE);
+	TIM_Cmd(TIM3, ENABLE);
+
+	NVIC_InitStructure.NVIC_IRQChannel = TIM7_IRQn;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 2;
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 2;
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_Init(&NVIC_InitStructure);
 
 	servo_simple_set_output(0.5);
 
-	TIM_Cmd(TIM3, ENABLE);
+
 }
 
 void servo_simple_set_output(float out) {
