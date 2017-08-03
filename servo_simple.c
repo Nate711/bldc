@@ -50,7 +50,8 @@ void servo_simple_init(void) {
 			PAL_STM32_OSPEED_HIGHEST | PAL_STM32_PUDR_FLOATING);
 
 	// TODO: figure out if pin has to be on APB1 periph
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
+	// TIM7 clock enable
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM7, ENABLE);
 
 	/**
 	 * Set up the timer for the pwm generation.
@@ -62,23 +63,22 @@ void servo_simple_init(void) {
 	TIM_TimeBaseStructure.TIM_ClockDivision = 0;
 	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
 
-	TIM_TimeBaseInit(TIM3, &TIM_TimeBaseStructure);
+	TIM_TimeBaseInit(TIM7, &TIM_TimeBaseStructure);
 
-	TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1;
-	TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
-	TIM_OCInitStructure.TIM_Pulse = 0;
-	TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High;
+	// Prescaler configuration
+	TIM_PrescalerConfig(TIM7, PrescalerValue, TIM_PSCReloadMode_Immediate);
 
-	TIM_OC2Init(TIM3, &TIM_OCInitStructure);
-	TIM_OC2PreloadConfig(TIM3, TIM_OCPreload_Enable);
+	// Disable ARR buffering
+	TIM_ARRPreloadConfig(TIM7, DISABLE);
 
-	TIM_ARRPreloadConfig(TIM3, DISABLE);
-
-
-	// TODO set interrupt
 	// Interrupt generation
-	TIM_ITConfig(TIM3, TIM_IT_Update, ENABLE);
-	TIM_Cmd(TIM3, ENABLE);
+	TIM_ITConfig(TIM7, TIM_IT_Update, ENABLE);
+
+	// TIM6 enable counter
+	TIM_Cmd(TIM7, ENABLE);
+
+	// NVIC
+	NVIC_InitTypeDef NVIC_InitStructure;
 
 	NVIC_InitStructure.NVIC_IRQChannel = TIM7_IRQn;
 	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 2;

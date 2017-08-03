@@ -141,10 +141,14 @@ void hw_setup_servo_outputs(void) {
 	servos[0].offset = 0;
 	servos[0].pos = 128;
 
+
+	// PB4 is njrst port so not being used and also not connected to anything
+	/**
 	servos[1].gpio = GPIOB;
 	servos[1].pin = 4;
 	servos[1].offset = 0;
 	servos[1].pos = 0;
+	**/
 }
 
 void hw_start_i2c(void) {
