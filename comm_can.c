@@ -170,10 +170,10 @@ static THD_FUNCTION(cancom_process_thread, arg) {
 						float kd = (buffer_get_int16(rxmsg.data8, &ind) / 100000.0);
 
 						// JANK AFF WAY OF ADDING POSITION
-						float pos = (buffer_get_int16(rxmsg.data8,&ind) / 100000.0);
+						// float pos = (buffer_get_int16(rxmsg.data8,&ind) / 100000.0);
 
 						mc_interface_set_position_pid_constants(kp,ki,kd);
-						mc_interface_set_pid_pos(pos);
+						// mc_interface_set_pid_pos(pos);
 						timeout_reset();
 						break;
 
