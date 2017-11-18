@@ -169,7 +169,7 @@ static THD_FUNCTION(cancom_process_thread, arg) {
 						float ki = (buffer_get_int16(rxmsg.data8, &ind) / 100000.0);
 						float kd = (buffer_get_int16(rxmsg.data8, &ind) / 100000.0);
 
-						// JANK AFF WAY OF ADDING POSITION
+						// JANK AF WAY OF ADDING POSITION
 						float pos = (buffer_get_int16(rxmsg.data8,&ind) / 50.0);
 
 						mc_interface_set_position_pid_constants(kp,ki,kd);
@@ -201,6 +201,10 @@ static THD_FUNCTION(cancom_process_thread, arg) {
 						timeout_reset();
 						break;
 
+					// NOTE: because the position pid function uses utils_angle_difference
+					// which automatically normalizes the angle difference, the target
+					// position sent over CAN bus does not have to be in any specific
+					// angle range.
 					case CAN_PACKET_SET_POS:
 						ind = 0;
 						mc_interface_set_pid_pos((float)buffer_get_int32(rxmsg.data8, &ind) / 1000000.0);
