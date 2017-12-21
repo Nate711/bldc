@@ -203,10 +203,18 @@ int main(void) {
 	chThdCreateStatic(timer_thread_wa, sizeof(timer_thread_wa), NORMALPRIO, timer_thread, NULL);
 
 	for(;;) {
-		chThdSleepMilliseconds(10);
+		int encoder_status_period = 1000;
+		systime_t sleep_time = CH_CFG_ST_FREQUENCY / (encoder_status_period);
+
+		if (sleep_time == 0) {
+			sleep_time = 1;
+		}
+
+		chThdSleep(sleep_time);
 
 		if (encoder_is_configured()) {
-			//		comm_can_set_pos(0, encoder_read_deg());
+      // Send rotor position at 100hz
+			commands_send_rotor_pos(encoder_read_deg());
 		}
 	}
 }
