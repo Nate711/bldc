@@ -42,15 +42,23 @@ void servo_simple_init(void) {
 	TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
 	TIM_OCInitTypeDef  TIM_OCInitStructure;
 
-  // NATHAN - what alternate function do I want??
-	// To change which timer you use, must also change alternate function timer
-	// and all timer references here
-	palSetPadMode(HW_UART_TX_PORT, HW_UART_TX_PIN, PAL_MODE_ALTERNATE(HW_SERVO_OUT_AF) |
+
+	/**
+	 * Use the same pin for servo out as the servo in pin, aka the 3 pin connector
+	 * on the VESC. Set it to its alternate function which is connected to TIM3
+	 */
+
+	palSetPadMode(HW_ICU_GPIO, HW_ICU_PIN, PAL_MODE_ALTERNATE(HW_ICU_GPIO_AF) |
 			PAL_STM32_OSPEED_HIGHEST | PAL_STM32_PUDR_FLOATING);
 
 	//RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM8, ENABLE);
 	RCC_APB2PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
 
+	/**
+	 * Set up the timer for the pwm generation.
+	 * Prescaler is set such that the clock operates at 1MHz with a period of
+	 * set to match the servo out hz (like 400hz, 1000hz etc)
+	 */
 	TIM_TimeBaseStructure.TIM_Period = (uint16_t)((uint32_t)TIM_CLOCK / (uint32_t)SERVO_OUT_RATE_HZ);
 	TIM_TimeBaseStructure.TIM_Prescaler = (uint16_t)((168000000 / 2) / TIM_CLOCK) - 1;
 	TIM_TimeBaseStructure.TIM_ClockDivision = 0;

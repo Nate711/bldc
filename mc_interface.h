@@ -65,6 +65,10 @@ int mc_interface_get_tachometer_abs_value(bool reset);
 float mc_interface_get_last_inj_adc_isr_duration(void);
 float mc_interface_read_reset_avg_motor_current(void);
 float mc_interface_read_reset_avg_input_current(void);
+
+/** CUSTOM set position pid constants **/
+void mc_interface_set_position_pid_constants(float kp, float ki, float kd);
+
 float mc_interface_get_pid_pos_set(void);
 float mc_interface_get_pid_pos_now(void);
 float mc_interface_get_last_sample_adc_isr_duration(void);

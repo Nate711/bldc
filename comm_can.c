@@ -35,6 +35,7 @@
 #include "app.h"
 #include "crc.h"
 #include "packet.h"
+#include "encoder.h"
 
 // Settings
 #define CANDx			CAND1
@@ -157,8 +158,25 @@ static THD_FUNCTION(cancom_process_thread, arg) {
 				CAN_PACKET_ID cmd = rxmsg.EID >> 8;
 				can_status_msg *stat_tmp;
 
+				// TODO: change it so it doesn't read all messages from 255
 				if (id == 255 || id == app_get_configuration()->controller_id) {
 					switch (cmd) {
+
+					/** CUSTOM PID CONStANT SETTING **/
+					case CAN_PACKET_SET_P_PID_K:
+						ind = 0;
+						float kp = (buffer_get_int16(rxmsg.data8, &ind) / 100000.0);
+						float ki = (buffer_get_int16(rxmsg.data8, &ind) / 100000.0);
+						float kd = (buffer_get_int16(rxmsg.data8, &ind) / 100000.0);
+
+						// JANK AF WAY OF ADDING POSITION
+						float pos = (buffer_get_int16(rxmsg.data8,&ind) / 50.0);
+
+						mc_interface_set_position_pid_constants(kp,ki,kd);
+						mc_interface_set_pid_pos(pos);
+						timeout_reset();
+						break;
+
 					case CAN_PACKET_SET_DUTY:
 						ind = 0;
 						mc_interface_set_duty((float)buffer_get_int32(rxmsg.data8, &ind) / 100000.0);
@@ -183,9 +201,15 @@ static THD_FUNCTION(cancom_process_thread, arg) {
 						timeout_reset();
 						break;
 
+					// NOTE: because the position pid function uses utils_angle_difference
+					// which automatically normalizes the angle difference, the target
+					// position sent over CAN bus does not have to be in any specific
+					// angle range.
 					case CAN_PACKET_SET_POS:
 						ind = 0;
 						mc_interface_set_pid_pos((float)buffer_get_int32(rxmsg.data8, &ind) / 1000000.0);
+						// mc_interface_set_pid_pos(45.0);
+						// mc_interface_set_current(0.5);
 						timeout_reset();
 						break;
 
@@ -282,14 +306,29 @@ static THD_FUNCTION(cancom_status_thread, arg) {
 		if (app_get_configuration()->send_can_status) {
 			// Send status message
 			int32_t send_index = 0;
-			uint8_t buffer[8];
-			buffer_append_int32(buffer, (int32_t)mc_interface_get_rpm(), &send_index);
-			buffer_append_int16(buffer, (int16_t)(mc_interface_get_tot_current() * 10.0), &send_index);
-			buffer_append_int16(buffer, (int16_t)(mc_interface_get_duty_cycle_now() * 1000.0), &send_index);
+			uint8_t buffer[4];
+
+			// convert rotor degrees (float) to 8 byte integer and append it to buffer
+			buffer_append_int32(buffer, (int32_t)(encoder_read_deg()*100000.0), &send_index);
+			// hopefully don't need the buffer to be 8 bytes
+
+			//buffer_append_int32(buffer, (int32_t)mc_interface_get_rpm(), &send_index);
+			//buffer_append_int16(buffer, (int16_t)(mc_interface_get_tot_current() * 10.0), &send_index);
+			//buffer_append_int16(buffer, (int16_t)(mc_interface_get_duty_cycle_now() * 1000.0), &send_index);
 			comm_can_transmit(app_get_configuration()->controller_id | ((uint32_t)CAN_PACKET_STATUS << 8), buffer, send_index);
 		}
 
-		systime_t sleep_time = CH_CFG_ST_FREQUENCY / app_get_configuration()->send_can_status_rate_hz;
+		systime_t sleep_time = CH_CFG_ST_FREQUENCY / (app_get_configuration()->send_can_status_rate_hz);
+
+		// over ride the status rate of the can message
+		/* NOTE: the CAN speed is 500KBaud
+		 * with a 8byte can message that is 128bits without bit stuffing
+		 * with a 4byte can message that is 96bits -> 5000hz
+		 * sending 4 byte messages back and forth -> 2500hz
+		 **/
+
+		// the divisor is the period of the update in microseconds
+		// systime_t sleep_time = CH_CFG_ST_FREQUENCY / 1000;
 		if (sleep_time == 0) {
 			sleep_time = 1;
 		}

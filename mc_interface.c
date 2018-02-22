@@ -294,6 +294,7 @@ mc_state mc_interface_get_state(void) {
 	return ret;
 }
 
+
 void mc_interface_set_duty(float dutyCycle) {
 	if (mc_interface_try_input()) {
 		return;
@@ -351,6 +352,23 @@ void mc_interface_set_pid_speed(float rpm) {
 
 	default:
 		break;
+	}
+}
+
+/** CUSTOM PID CONSTANT **/
+void mc_interface_set_position_pid_constants(float kp, float ki, float kd) {
+	switch(m_conf.motor_type) {
+		case MOTOR_TYPE_BLDC:
+			break;
+		case MOTOR_TYPE_DC:
+			break;
+		case MOTOR_TYPE_FOC:
+			m_conf.p_pid_kp = kp;
+			m_conf.p_pid_ki = ki;
+			m_conf.p_pid_kd = kd;
+
+			mcpwm_foc_set_position_pid_constants(kp, ki, kd);
+			break;
 	}
 }
 
